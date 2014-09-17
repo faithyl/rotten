@@ -12,20 +12,39 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
 
     @IBOutlet weak var tableView: UITableView!
     var movies: [NSDictionary] = []
+    var refreshControl:UIRefreshControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
 
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        
+        self.refresh(self)
+        
+        MBProgressHUD.hideHUDForView(self.view, animated: true)
+        
+        self.refreshControl = UIRefreshControl()
+        self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refersh")
+        self.refreshControl.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
+        self.tableView.addSubview(self.refreshControl)
+    }
+    
+    func refresh(sender:AnyObject)
+    {
         var url = "http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json?apikey=dagqdghwaq3e3mxyrp7kmmj5&limit=20&country=us"
+        
         var request = NSURLRequest (URL: NSURL(string: url))
-            NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) {(response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
-                var object = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as NSDictionary
-                
-                self.movies = object["movies"] as [NSDictionary]
-                
-                self.tableView.reloadData()
+        NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) {(response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
+            var object = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as NSDictionary
+            
+            self.movies = object["movies"] as [NSDictionary]
+            
+            self.tableView.reloadData()
+            
+            self.refreshControl.endRefreshing()
+            
         }
     }
 
