@@ -13,22 +13,24 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var tableView: UITableView!
     var movies: [NSDictionary] = []
     var refreshControl:UIRefreshControl!
+    @IBOutlet weak var errmsgView: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
-
+        
+        self.errmsgView.hidden = true
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-        
-        self.refresh(self)
-        
-        MBProgressHUD.hideHUDForView(self.view, animated: true)
         
         self.refreshControl = UIRefreshControl()
         self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refersh")
         self.refreshControl.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
         self.tableView.addSubview(self.refreshControl)
+        
+        self.refresh(self)
+        
+        MBProgressHUD.hideHUDForView(self.view, animated: true)
     }
     
     func refresh(sender:AnyObject)
@@ -37,12 +39,16 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         var request = NSURLRequest (URL: NSURL(string: url))
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) {(response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
-            var object = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as NSDictionary
+            if (error != nil) {
+                self.errmsgView.hidden = false
+            } else {
+                var object = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as NSDictionary
             
-            self.movies = object["movies"] as [NSDictionary]
+                self.movies = object["movies"] as [NSDictionary]
             
-            self.tableView.reloadData()
-            
+                self.tableView.reloadData()
+                self.errmsgView.hidden = true
+            }
             self.refreshControl.endRefreshing()
             
         }
