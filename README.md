@@ -9,3 +9,6 @@ Completed user stories:
     User sees loading state while waiting for movies API. You can use one of the 3rd party libraries at cocoacontrols.com.
     User sees error message when there's a networking error. You may not use UIAlertView to display the error. See this screenshot     for what the error message should look like: network error screenshot.
     User can pull to refresh the movie list.
+    
+Demo:
+https://raw.githubusercontent.com/faithyl/rotten/master/Rotten_Class1.gif
